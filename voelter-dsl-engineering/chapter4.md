@@ -345,5 +345,47 @@
 
 ## 4.7 – Concrete Syntax
 
+- The **notation** of the DSL is very important.
+- There might be **existing notations** that should be reused.
 
+#### 4.7.1 – Design Concerns for Concrete Syntax
+
+- The following **concerns** can be considered when designing a concrete syntax:
+  - **Writability:** A syntax that can be written efficiently. Factors are **conciseness** and **tool support.**
+  - **Readability:** A syntax that can be read effectively.
+  - **Learnability:** Good **IDE support** and using **domain concepts** make a language (and syntax) that is easy to learn.
+  - **Effectiveness:** How effective an already adept user is with the language.
+- **Tradeoffs:** Some of these concerns are **in conflict.** For example:
+  - **Writability vs. Readability:** Extreme writability almost certainly lowers readability (e.g. APL).
+  - A learnable language may be **annoying to language experts.**
+  - For **throw-away models,** readability is not important.
+- **Multiple Notations:** 
+  - The above tradeoffs can be tackled by providing **multiple concrete syntaxes,** tailored for a specific concern (e.g. learning vs. being effective).
+  - For **projectional editors,** multiple notations are relatively easy to implement.
+- **Reports and Visualization:**
+  - **Visualization:** An immutable *graphical* representation of a model that focuses on some informational aspect.
+  - **Report:** An immutable *textual* representation of a model that focuses on some informational aspect.
+  - Reports and Visualizations are useful for stakeholders that want a more **readable representation.**
+
+#### 4.7.2 – Classes of Concrete Syntax
+
+- There are several **major classes** of concrete syntax:
+  - **Textual:** ASCII or Unicode characters.
+    - **Integrates** well with development existing tools.
+    - Suited for **detailed descriptions.**
+    - Can be very **effective,** especially for developers.
+    - When designing a textual syntax, think about how it can **support the IDE and code completion.** More general information should come first (e.g. `FROM t SELECT a, b` instead of `SELECT a, b FROM t`).
+  - **Symbolic:** Textual DSLs with an extended set of symbols (e.g. mathematical symbols).
+    - Good for domains that use **many symbols and special notations.**
+  - **Graphical:** Shapes, forms and diagrams.
+    - Good at describing **(causal) relationships,** **flow,** and **timing.** 
+    - **Easier to learn.**
+    - **Less effective** for experienced users.
+  - **Tables and Matrices:** Table and matrix structures.
+    - Useful for collections of **similarly structured items.**
+    - Useful for showing how two **independent data dimensions** are related.
+    - **Focus on readability** over writability.
+- **Relationship to Hierarchical Domains:**
+  - More **general domains** are better expressed with textual or symbolic notations.
+  - More **specific domains** have more abstraction, which is often well expressed via graphical notations.
 
