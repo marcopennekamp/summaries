@@ -121,7 +121,12 @@
 
 
 
+## 5.3 – Combinations
 
-
-
+- **Language composition** can become challenging if the two languages have different behavioral paradigms.
+- **Typical combinations in DSLs:**
+  - **Dataflow languages** with functional, imperative or declarative calculation rules.
+  - **State-based languages** with simple expressions for transition guards and imperative actions.
+  - **Reactive Programming:** Dataflow or state-based programs react to events (event-based language).
+  - **Structural languages** with functional pre- and post-conditions and a state-based language for protocol state machines.
 
