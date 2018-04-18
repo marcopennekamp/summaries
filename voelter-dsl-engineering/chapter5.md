@@ -55,5 +55,73 @@
 
 
 
+## 5.2 – Behavior
+
+- The **behavior** for a particular domain can often be derived from already established **behavioral paradigms.**
+- Some DSLs **don't have behavior descriptions:** 
+  - **Structure defining DSLs.**
+  - DSLs where the behavior is derived from a **set of expectations** that is specified by the programmer declaratively.
+- **Advantages** of using established behavioral paradigms:
+  - Defining **consistent and correct semantics** is not trivial.
+  - A paradigm may come with existing **analysis approaches.**
+  - **A generator** may already exist that generates an efficient executable for a platform (e.g. state machines).
+
+#### 5.2.1 – Imperative
+
+- Imperative programs are a **sequence of statements** that can be executed and change the state of the program.
+- **Analysis:** Expensive because of aliasing (multiple variables point to the same mutable location) and side effects.
+- **Debugging:** Easy.
+
+#### 5.2.2 – Functional
+
+- **Functions** are the core abstraction.
+- **Referential Transparency:** The return value of a function only depends on its arguments.
+- Purely functional programs are almost useless, because they **can't interact with their environment.** So DSLs often use functional programming for a **calculation core.**
+- **Analysis and Optimization:** Easy.
+- **Debugging:** Showing intermediate results of function calls.
+
+#### 5.2.3 – Debugging
+
+- Declarative programs specify **what** the program should accomplish, not **how.**
+- **Possible elements:** Properties, equations, relationships, constraints.
+- **Advantage:** The **evaluation engine** can decide how to evaluate a program, so the evaluation can be evovled over time.
+- **Disadvantage:** Finding the solution is often expensive, using trial and error, backtracking or exhaustive search.
+- **Debugging:** Hard, because the evaluation engine may be a complex black box.
+- **Sub-Paradigms:**
+  - **Declarative Concurrent Programming**
+  - **Constraint Programming:** Find all values for variables that adhere to some constraints.
+  - **Logic Programming:** Facts, rules and queries.
+
+#### 5.2.4 – Reactive/Event-based/Agent
+
+- Behavior is triggered by **received events.**
+- Events can be **created** by an entity or the environment.
+- **Reactions** mean the creation of subsequent events.
+- **Debugging:** Simple, if the timing of events can be controlled. If the timing can not be controlled, simulators may be an option.
+
+#### 5.2.5 – Dataflow
+
+- Variables have **dependencies** expressed by **calculation rules** to each other.
+- If a variable $a$ **changes,** all variables depending on $a$ are recalculated.
+- **Use Cases:**
+  - Spreadsheets
+  - Data Flow Diagrams
+  - Frameworks like React/VueJS/Angular make use of dataflow programming
+- **Execution Modes:**
+  - **Approach 1:** All dependent variables are recalculated right away.
+  - **Approach 2:** Value changes are seen as messages. Variables are only recalculated if all dependencies of a variable have sent a change message.
+  - **Approach 3:** A scheduler determines when calculations should be performed.
+- **Debugging:** Easy, because visualization is simple and calculations are always in distinct states.
+
+#### 5.2.6 – State-based
+
+- Describes system behavior as a set of **states** the system can be in, **transitions** from state to state, **events** that trigger transitions and **actions** that are executed on state change.
+- **Debugging:** Easy, because we can visualize the state machine.
+- **Model checking** can be used to analyse the system.
+
+
+
+
+
 
 
