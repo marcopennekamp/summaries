@@ -45,3 +45,39 @@
 
 
 
+## 6.2 – Using DSLs
+
+#### 6.2.1 – Reviews
+
+- Regular **model reviews** help with finding mistakes that users make when writing DSL models.
+- This is especially important in **early stages** of language usage, when users are still learning.
+- Model reviews are **easier** than GPL code reviews, because DSLs are more concise.
+- **Recurring mistakes** can be combated with constraints or influence the language design process (if the mistake shows an error in the language design).
+
+#### 6.2.3 – Domain Users Programming?
+
+- In some domains, especially non-formal ones, it might be helpful to **pair a developer and domain expert.**
+- Domain experts in such domains are often not able to sufficiently **formalize** their knowledge.
+- If domain users are not able to use a language, it might be a **language design problem.**
+
+#### 6.2.4 – DSL Evolution
+
+- **Target Platform Changes:**
+  - **New technologies** might have an effect on the target platform choice.
+  - *Ideal:* A **new execution engine** for the new platform can be created without changing the language or the models.
+  - *Sometimes:* DSLs may make **assumptions** about the target platform, which have to be removed from language and models.
+- **Domain Changes:**
+  - The language will need to **evolve with the domain.**
+  - **Existing models** will need to be evolved with the language.
+  - Ways to **keep models functioning:**
+    - Make the language **backward compatible,** including **deprecation** when you want to delete something.
+    - Provide **quick fixes** for deprecated concepts.
+    - **Automatically transform** the old model to a new version, which is only feasible if you have access to all existing models.
+- **DSL Tool Changes:**
+  - The language has to adapt if the **DSL tool changes.**
+  - If the DSL tool is no longer supported, you have to **switch the tool.** Language definitions have to be redone, but models should be **automatically transformable.**
+
+
+
+
+
