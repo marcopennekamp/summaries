@@ -55,6 +55,8 @@
 
 
 
+
+
 ## 5.2 – Behavior
 
 - The **behavior** for a particular domain can often be derived from already established **behavioral paradigms.**
@@ -118,6 +120,8 @@
 - Describes system behavior as a set of **states** the system can be in, **transitions** from state to state, **events** that trigger transitions and **actions** that are executed on state change.
 - **Debugging:** Easy, because we can visualize the state machine.
 - **Model checking** can be used to analyse the system.
+
+
 
 
 
