@@ -82,7 +82,7 @@
 - **Analysis and Optimization:** Easy.
 - **Debugging:** Showing intermediate results of function calls.
 
-#### 5.2.3 – Debugging
+#### 5.2.3 – Declarative
 
 - Declarative programs specify **what** the program should accomplish, not **how.**
 - **Possible elements:** Properties, equations, relationships, constraints.
