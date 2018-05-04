@@ -93,3 +93,15 @@
     - Transforming grammars so that they conform to a precedence scheme and a particular grammar class makes them **resistant to composition:** Composing two grammars from a grammar class can lead to a grammar that is not in that class.
     - **Scanner conflicts** can arise from composition. These can be fixed with context-aware scanners or scannerless parsers.
 
+
+
+## 7.2 – Fundamentals of Projectional Editing
+
+- In projectional editors, the **AST is modified directly** as the user edits the program.
+- A projection engine **renders** the AST accordingly to projection rules. This representation is the basis for user interaction.
+- AST objects are created by picking the right concept with **code completion.**
+- If two concepts are triggered by the same keyword, the user can simply decide which concept to use and **no ambiguity** is introduced.
+- Each AST node has a **UID (unique ID).** Program elements point to each other with this UID.
+- Programs are often **stored** in XML.
+- **Event handlers** can be defined which react to user gestures and modify the AST accordingly.
+
