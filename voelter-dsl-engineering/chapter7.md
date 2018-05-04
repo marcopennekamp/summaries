@@ -14,8 +14,6 @@
 
 ## 7.1 – Fundamentals of Free Text Editing and Parsing
 
-#### 7.1.1 – Parser Generation Technology
-
 - **Manually** writing a parser requires significant experience and effort. This makes sense for **standardized programming languages** with a large user base, because it leads to faster parsing, and better error reporting and error recovery.
 
 - Parsers can also be **generated** (from a **grammar**) with bounded performance guarantees that make them *fast enough.* This reduces the effort of building and changing the concrete syntax by a huge margin.
