@@ -147,3 +147,11 @@
 - In **textual languages,** all information in the fragment must (trivially) be visible.
 - In projectional languages, **any kind of information** can be hidden in a particular projection (and visible in another).
 
+
+
+## 7.4 – Characteristics of AST Formalisms
+
+- The **Eclipse Modeling Framework (EMF)** is the core of all Eclipse modeling tools. **ECore** is EMF's meta meta model.
+- Spoofax uses **ATerm** to represent abstract syntax.
+- **MPS** represents the abstract syntax directly by **nodes** that are instances of specific **concepts.** Conceptually very close to ECore.
+
