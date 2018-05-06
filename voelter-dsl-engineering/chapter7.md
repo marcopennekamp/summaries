@@ -105,3 +105,45 @@
 - Programs are often **stored** in XML.
 - **Event handlers** can be defined which react to user gestures and modify the AST accordingly.
 
+
+
+## 7.3 – Comparing Parsing and Projection
+
+#### 7.3.1 – Editing Experience
+
+- With free text editing, **any text editor** can be used, but users **expect a modern IDE.**
+- With projectional editing, a normal text editor is not sufficient. A **specialized editor** has to render the projections and manipulate the AST.
+  - If the notation is **textual-looking,** the editor has to make the experience text-like. MPS does the following things to achieve this: Aliased concepts in code completion, side transforms, smart references, smart delimiters for lists.
+
+#### 7.3.2 – Language Modularity
+
+- Composing grammars in **parser-based systems:**
+  - Issues with **grammar classes** and **ambiguity** that have to be solved **invasively.**
+  - Better support in systems like Spoofax where a GLR parser allows adding **disambiguation rules** without changing source grammars.
+- **In projectional editors:** Language composition is **not a problem** at all.
+
+#### 7.3.3 – Notational Freedom
+
+- **Parser-based languages** are obviously limited to unicode characters. 
+- **Projectional editors** support text, tables, fractions, math symbols, graphicals notations, diagrams, and so on.
+
+#### 7.3.4 – Language Evolution
+
+- In projectional editors, **model migrations** have to be written if the structure behind the scenes changes. MPS supports language migrations and quick fixes for deprecated concepts.
+- Text-based languages have the advantage, that a model can **always be opened** and migrated manually. However, there is usually no built-in framework for model migrations.
+
+#### 7.3.5 – Infrastructure Integration
+
+- Current software development tools are typically **text-oriented.**
+- For projectional languages, **special support for infrastructure integration** is needed (e.g. VCS integration).
+
+#### 7.3.6 – Tool Lock-In
+
+- Of course, **textual languages** have the advantage that they don't lock the user into using an IDE.
+- Practically speaking, however, **both approaches** effectively lock the DSL user to an IDE with language support.
+
+#### 7.3.7 – Hidden Information
+
+- In **textual languages,** all information in the fragment must (trivially) be visible.
+- In projectional languages, **any kind of information** can be hidden in a particular projection (and visible in another).
+
