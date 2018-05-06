@@ -155,3 +155,97 @@
 - Spoofax uses **ATerm** to represent abstract syntax.
 - **MPS** represents the abstract syntax directly by **nodes** that are instances of specific **concepts.** Conceptually very close to ECore.
 
+
+
+## 7.5 – Xtext Example
+
+- **Grammar Basics:**
+
+  Example for a **parser rule:**
+
+  ```
+  CoolingProgram:
+    "cooling" "program" name=ID "{"
+      (events+=CustomEvent | variables+=Variable)*
+      (initBlock=InitBlock)?
+      (states+=State)* 
+    "}";
+  ```
+
+  ID is a **terminal rule** defined in the **parent grammar:**
+
+  ```
+  terminal ID: (’a’..’z’|’A’..’Z’|’_’) 
+               (’a’..’z’|’A’..’Z’|’_’|’0’..’9’)*;
+  ```
+
+  Xtext/ANTLR grammars also determine the **mapping to the AST** (e.g. via `name=ID`, `initBlock=InitBlock`, `states+=State`).
+
+  **Alternatives** reflected as inheritance in the meta model:
+
+  ```
+  State: BackgroundState | StartState | CustomState;
+  ```
+
+  If these alternatives **share some properties,** they are pulled up to the State meta class.
+
+- **References:**
+
+  ```
+  ChangeStateStatement: "state" targetState=[State];
+  ```
+
+  The square brackets indicate that `targetState` is a **reference** to an existing state, instead of a new one. This allows Xtext to support **automatic name resolution.**
+
+  The **concrete syntax of the reference** can also be changed:
+
+  ```
+  ChangeStateStatement: "state" targetState=[State|QID];
+  QID: ID ("." ID)*;
+  ```
+
+  Here, the **vertical bar** does not represent an alternative, but is syntax that indicates the custom syntax.
+
+- **Expressions:**
+
+  ```
+  AssignmentStatement: "set" left=Expr "=" right=Expr;
+  
+  Expr: ComparisonLevel;
+  
+  ComparisonLevel returns Expression:
+    AdditionLevel ((  ({Equals.left=current} "==") |
+                      ({LogicalAnd.left=current} "&&") | 
+                      ({Smaller.left=current} "<")
+                   ) right=AdditionLevel)?;
+  
+  AdditionLevel returns Expression:
+    MultiplicationLevel ((  ({Plus.left=current} "+") |
+                            ({Minus.left=current} "-")
+                         ) right=MultiplicationLevel)*;
+  
+  MultiplicationLevel returns Expression: 
+    PrefixOpLevel ((  ({Multi.left=current} "*") |
+                      ({Div.left=current} "/")
+                   ) right=PrefixOpLevel)*;
+                   
+  PrefixOpLevel returns Expression: 
+    ({NotExpression} "!" "(" expr=Expr ")") 
+    | AtomicLevel;
+    
+  AtomicLevel returns Expression:
+    ({TrueLiteral} "true") |
+    ({FalseLiteral} "false") |
+    ({ParenExpr} "(" expr=Expr ")") | 
+    ({NumberLiteral} value=DECIMAL_NUMBER) | 
+    ({SymbolRef} symbol=[SymbolDeclaration|QID]);
+  ```
+
+  Meta classes are only instantiated if a property is assigned. An action like `{TrueLiteral}` **forces the instantiation** of an object.
+
+  The `current` keyword, which always refers to the most recently created object, can be used to assign the AST object itself to a property of another AST object.
+
+  For rules with the `Level`-suffix, no meta classes are created. They are only used to **encode precedence.**
+
+
+
