@@ -249,3 +249,87 @@
 
 
 
+## 7.7 – MPS Example
+
+- **Concept Definition:** First, the **abstract syntax** has to be defined by creating concepts. The syntax is different in the newest MPS, but this illustrates the concept definition nonetheless.
+
+  ```
+  concept Statemachine extends BaseConcept 
+                       implements IModuleContent
+                                  ILocalVarScopeProvider 
+                                  IIdentifierNamedElement
+    children:
+      State   states   0..n
+      InEvent inEvents 0..n
+      
+    references:
+      State   initial  1
+     
+    concept properties:
+      alias = statemachine
+  ```
+
+  **References** can be used to refer to already existing concepts, i.e. without creating a new instance of the concept.
+
+- **Editor Definition:** Here, we have to define the **projection rules.** An editor is made of **cells** of many different types, which are arranged to achieve the desired syntax structure. See page 214 for example images.
+
+- **Intentions:** Also known as **quick fix.** Intentions are actions available via a menu that transform the model in some way. Many projectional languages have features that are **only accessible through intentions,** because supporting some features with typing is tricky. Intentions are defined for a **specific language concept,** but are optionally available in child nodes.
+
+  ```
+  intention addEntryActions for concept State { 
+    available in child nodes : true
+    
+    description(editorContext, node)->string { 
+      "Add Entry Action";
+    }
+  
+    isApplicable(editorContext, node)->boolean { 
+      node.entryAction.isNull;
+    }
+  
+    execute(editorContext, node)->void { 
+      node.entryAction.set new(<default>);   
+      editorContext.selectWRTFocusPolicy(node.entryAction);
+    }
+  }
+  ```
+
+- **Side Transforms:** Side transforms can be used to make typing linear text more comfortable.
+
+  ```
+  side transform actions makeArithmeticExpression
+  
+    right transformed node: Expression tag: default_
+  
+    actions :
+      add custom items (output concept: PlusExpression)
+        simple item
+          matching text
+            +
+          do transform
+            (operationContext, scope, model, 
+             sourceNode, pattern)->node< > {
+              node<PlusExpression> expr = new node<PlusExpression>();                               
+              sourceNode.replace with(expr);
+              expr.left = sourceNode;
+              expr.right.set new(<default>);
+              return expr.right; 
+            }
+  ```
+
+- **Context Restrictions:** In some cases, child concepts should not be usable in place of a parent concept.
+
+  ```
+  concept constraints AssertStatement { 
+    can be child
+      (operationContext, scope, parentNode, link, 
+       childConcept)->boolean { 
+        parentNode.ancestor<TestCase, +>.isNotNull;
+      } 
+  }
+  ```
+
+  The constraint in the example above ensures that assert statements can only be used in test case functions, not common functions.
+
+- **Tables and Graphics:** Tables can be rendered with the **table cell** (see page 218 for an example). The **inspector** for the table cell can then be used to define the table structure.
+
