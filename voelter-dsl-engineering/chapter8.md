@@ -71,3 +71,46 @@
   - The **`IDefaultResourceDescriptionStrategy`** can be used to build custom `IEOBjectDescription` objects (to store user data).
 - The **`ImportNamespacesAwareGlobalScopeProvider`** is the default **global scope provider** and allows referencing an element either trough its fully qualified name, or through its simple name if it has been imported.
 
+
+
+## 8.3 – Scoping in MPS
+
+- **References in MPS** are defined as part of the language structure. An **editor** determines how a referenced element is rendered.
+
+- A **scoping function** determines which elements are the valid targets of a reference.
+
+- **Simple Scopes:**
+
+  - **Transition concept:**
+
+    ```
+    concept Transition
+      references:
+        State target 1
+    ```
+
+  - A **search scope constraint** can be used to implement the scope function:
+
+    ```
+    link {target}
+      referent set handler:
+        <none> 
+      search scope:
+        (referenceNode, linkTarget, enclosingNode, ...) 
+                 ->join(ISearchScope | sequence<node<State>>) {
+          enclosingNode.ancestor<Statemachine>.states; 
+        }
+      validator: 
+        <default>
+      presentation: 
+        <none>
+    ```
+
+  - A **referent set handler** is executed when a new reference target is set.
+
+  - Customized **presentation** in the code completion menu is also possible.
+
+- **Nested Scopes:** For nested scopes in MPS, you can use the [inherited scopes](https://confluence.jetbrains.com/display/MPSD33/Scopes) feature (the book is outdated here).
+
+- **Polymorphic References:** Each reference concept has their own editor and *their own scope definition.* If two references are possible in the same location, the user simply chooses with the code completion menu.
+
