@@ -71,3 +71,121 @@
 
 - **Impact analysis** in Xtext is limited to the `CheckType.EXPENSIVE` option.
 
+
+
+## 9.2 – Constraints in MPS
+
+#### 9.2.1 – Simple Constraints
+
+- Constraints in MPS (checking rules) are written in **BaseLanguage,** an extended version of Java.
+
+- **Constraint example:**
+
+  ```
+  checking rule stateUnreachable { 
+    applicable for concept = State as state 
+    do {
+      if (!state.initial && 
+          state.ancestor<Statemachine>.descendants<Transition>.
+          where({~it => it.target == state; }).isEmpty) 
+      { 
+        error "orphan state - can never be reached" -> state;
+      }
+    }
+  }
+  ```
+
+  This is equivalent to the unreachable state constraint in the Xtext section.
+
+- Constraints are evaluated based on **change tracking** performed by MPS.
+
+#### 9.2.2 – Dataflow
+
+- The **dataflow graph,** which describes the flow of data through a program's code, is the foundation of dataflow analysis.
+
+- The goal of dataflow analysis is to **detect problems** in a program.
+
+- MPS supports dataflow analysis.
+
+- **Building a Dataflow Graph:**
+
+  - A **dataflow builder** (DFB) builds the dataflow graph for instances of a concept.
+
+    ```
+    data flow builder for LocalVariableDeclaration { 
+      (node)->void {
+        if (node.init != null) { 
+          code for node.init 
+          write node = node.init
+        } else { 
+          nop
+        }
+      }
+    }
+    ```
+
+    The `code for` statement executes the DFB for the init expression. Then `write` is used to state that the value from the init expression is now in the declared variable. `nop` has to be used to mark the node as visited by the DFB.
+
+  - **Example for AssignmentStatement:**
+
+    ```
+    data flow builder for AssigmentStatement { 
+      (node)->void {
+        code for node.rvalue
+        write node.lvalue = node.rvalue 
+      }
+    }
+    ```
+
+  - See page 244 for an **example dataflow graph** for a given piece of code.
+
+  - DFB for an **if-statement:**
+
+    ```
+    nop
+    code for node.condition
+    ifjump after elseIfBlock
+    code for node.thenPart
+    { jump after node }
+    
+    label elseIfBlock
+    foreach elseIf in node.elseIfs {
+      code for elseIf 
+    }
+    if (node.elsePart != null) { 
+      code for node.elsePart
+    }
+    ```
+
+    `ifjump` indicates that a **jump** to the specified label is allowed. Since the `node.thenPart` may have a return statement, we might not reach `jump after node`, which is why it is marked optional by the curly braces.
+
+    If the condition was false, we jump to the `elseIfBlock` label. If one of the else-if parts is executed, we jump after the whole if-statement.
+
+    DFB for the **else-if:**
+
+    ```
+    code for node.condition
+    ifjump after node
+    code for node.body
+    { jump after node.ancestor<IfStatement> }
+    ```
+
+  - DFB for a **for-loop:**
+
+    ```
+    code for node.iterator 
+    label start
+    code for node.condition 
+    ifjump after node
+    code for node.body 
+    code for node.incr 
+    jump after start
+    ```
+
+- **Analyses:**
+
+  - Some dataflow analyses are **supported out of the box.**
+  - See page 246 for an **unreachable code** example.
+
+
+
