@@ -96,3 +96,115 @@ With pattern matching, the **possible type combinations** are listed in a table 
 
 
 
+## 10.3 – Xtext Example
+
+- Since version 2.0, Xtext supports a type system based on **JVM's type system,** which is limited to JVM-related types.
+
+- This section covers the author's own **Xtext Typesystem Framework,** a third party library.
+
+- **Xtext Typesystem Framework:**
+
+  - Utilizes **recursive** type calculation.
+
+  - An interface **`ITypesystem`** declares a method `typeof(EObject)` that return the type of an element.
+
+  - **Manual integration** with Xtext (for error reporting):
+
+    ```java
+    @Inject
+    private ITypesystem ts;
+    
+    @Check(CheckType.NORMAL)
+    public void validateTypes(EObject m) {
+        ts.checkTypesystemConstraints(m, this);
+    }
+    ```
+
+  - The **`DefaultTypesystem`** class provides declarative support for common typing strategies.
+
+  - **Example:**
+
+    ```java
+    public class CLTypesystem extends DefaultTypesystem {
+        private CoolingLanguagePackage cl = 
+            CoolingLanguagePackage.eINSTANCE;
+        
+        @Override
+        protected void initialize() {
+            useCloneAsType(cl.getIntType());
+            ensureFeatureType(cl.getIfStatement(),
+                              cl.getIfStatement_Expr(),
+                              cl.getBoolType());
+        }
+        
+        public EObject type(NumberLiteral s, 
+                            TypeCalculationTrace trace) { 
+            if (s.getValue().contains(".")) {
+                return create(cl.getDoubleType());
+            }
+            return create(cl.getIntType()); 
+        }
+    }
+    ```
+
+  - The framework also provides a **textual DSL for typing rules** (see figure 10.2 on page 262). This DSL has the following **advantages:** Concise notation, referential integrity, code completion, static errors instead of runtime errors, easy navigation.
+
+  - The relatively simple type DSL can be supplemented by manually written Java code (**generation gap** pattern).
+
+- **Type System for the Cooling Language:**
+
+  - **Primitive types:**
+
+    ```
+    typeof BoolType -> clone 
+    typeof IntType -> clone 
+    typeof DoubleType -> clone 
+    typeof StringType -> clone
+    ```
+
+    That is, a primitive type uses a **copy of itself** (the element) as its type.
+
+  - **Fixed types:**
+
+    ```
+    typeof StringLiteral -> StringType
+    ```
+
+  - **Expression typing:**
+
+    ```
+    typeof Expr -> abstract
+    ```
+
+    Since `Expr` is abstract, we can provide an abstract typing rule here. This will need to be specialized for the various subclasses.
+
+    ```
+    typeof Plus -> common left right {
+        ensureType left :<=: IntType, DoubleType 
+        ensureType right :<=: IntType, DoubleType
+    }
+    ```
+
+    The `common` keyword ensures that the type of `Plus` will be the common (super-)type of the left and right type.
+
+    ```
+    characteristic COMPARABLE { 
+        IntType, DoubleType, BoolType
+    }
+    typeof Equals -> BoolType {
+        ensureType left :<=: char(COMPARABLE) 
+        ensureType right :<=: char(COMPARABLE) 
+        ensureCompatibility left :<=>: right
+    }
+    ```
+
+    A **type characteristic** is simply a set of types. The `:<=>:` operator describes that either type must be the subtype of the other type.
+
+    ```
+    typeof AssignmentStatement -> none { 
+        ensureCompatibility right :<=: left
+    }
+    ```
+
+
+
