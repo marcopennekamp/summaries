@@ -208,3 +208,135 @@ With pattern matching, the **possible type combinations** are listed in a table 
 
 
 
+## 10.4 – MPS Example
+
+- MPS uses **unification** and **pattern matching** for binary operators.
+
+- **Unification:**
+
+  - **`LocalVariableReference` example:**
+
+    ```
+    rule typeof_LocalVariableReference {
+      applicable for concept = LocalVariableReference as lvr 
+      overrides false
+    
+      do {
+        typeof(lvr) :==: typeof(lvr.variable);
+      }
+    }
+    ```
+
+  - **`NotExpression` example:**
+
+    ```w
+    // Ensure the operand is a boolean expression.
+    typeof(notExpr.expression) :==: new node<BooleanType>(); 
+    // Set the type of the not expression to boolean.
+    typeof(notExpr) :==: <boolean>;
+    ```
+
+  - **C struct example:**
+
+    ```c
+    struct Person { 
+        char* name;
+        int age; 
+    }
+    
+    int addToAge(Person p, int delta) { 
+        return p.age + delta;
+    }
+    ```
+
+    The `p` parameter and `p.age` expression have to be typed. **Parameter type:**
+
+    ```
+    typeof(parameter) :==: typeof(parameter.type);
+    ```
+
+    **StructAttributeReference** (concept of `p.age`):
+
+    ```
+    concept StructAttributeReference extends Expression 
+                                     implements ILValue
+      children:
+        Expression context 1
+        
+      references:
+        StructAttribute attribute 1
+    ```
+
+    **Typing rules for the attribute reference:**
+
+    ```
+    // The expression on the left side of the dot must be a struct.
+    typeof(structAttrRef.context) :<=: new node<GenericStructType>(); 
+    // The type of the expression is the type of the referenced field.
+    typeof(structAttrRef) :==: typeof(structAttrRef.attribute);
+    ```
+
+- **Pattern Matching:**
+
+  - Using pattern matching supports **language extension,** because new types can be added easily to existing binary operators.
+
+  - **`complex` example:**
+
+    ```
+    complex c1 = (1, 2i);
+    complex c2 = (3, 5i);
+    complex c3 = c1 + c2; // results in (4, 7i)
+    ```
+
+    Typing rules are already **extended** for `int` and `double` types:
+
+    ```
+    overloaded operations rules binaryOperation
+    
+    operation concepts: PlusExpression | MinusExpression
+    left operand type: <int>
+    right operand type: <int>
+    operation type: (operation, leftOperandType, 
+                     rightOperandType)->node<> {
+      <int>; 
+    }
+    
+    operation concepts: PlusExpression | MinusExpression
+    left operand type: <double>
+    right operand type: <double>
+    operation type: (operation, leftOperandType, 
+                     rightOperandType)->node<> {
+      <double>; 
+    }
+    ```
+
+    The following typing rule **integrates** the above definitions with regular typing rules:
+
+    ```
+    rule typeof_BinaryExpression {
+      applicable for concept = BinaryExpression as binex
+      
+      do {
+        node<> optype = operation type(binex, left, right); 
+        if (optype != null) {
+          typeof(binex) :==: optype; 
+        } else {
+          error "operator " + be.concept.name + 
+                " cannot be applied to " + left.concept.name + 
+                "/" + right.concept.name -> be;
+        } 
+      }
+    }
+    ```
+
+    We can simply **add another typing rule** for the `complex` type:
+
+    ```
+    PlusExpression | MinusExpression one operand type: <complex> operation type:
+    (operation, leftOperandType, rightOperandType)->node<> {
+      <complex>;
+    }
+    ```
+
+- The DSL is quite sophisticated, but in **edge cases,** BaseLanguage code may be written as well.
+
