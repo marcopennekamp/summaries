@@ -12,7 +12,7 @@
   - **Template languages** allow relatively comfortable text generation.
 - **Classical Model Transformation:** The generator traverses the program's AST and creates an AST for the target language with the appropriate APIs.
   - **Model Transformation Languages** support model navigation and tree construction (of the target AST).
-- **Hybrid Approaches** are based on the composability of the template language and the target language. 
+- **Hybrid Approaches** are based on the composability of the template language and the target language.
   - **In MPS,** template code (controlling the transformation) and target language code can be nested inside each other. 
 
 
@@ -159,4 +159,89 @@
   ```
 
 #### 11.2.2 – Model-to-Model Transformation
+
+- In the section example, we extend the cooling language with a **"preprocessor" model-to-model transformation.** The preprocessor adds emergency stop behavior to existing state machines.
+
+- We process the model *before* it is compiled:
+
+  ```
+  def compile(CoolingProgram program) {
+      val transformedProgram = program.transform
+      ’’’
+      <<FOR appl : transformedProgram.modules.map(m|m.module)
+                     .filter(typeof(Appliance))>>
+          <<FOR c : appl.contents>>
+              #define <<c.name>> <<c.index>> 
+          <<ENDFOR>>
+      <<ENDFOR>>
+      
+      // more ...
+      ’’’ 
+  }
+  ```
+
+- The corresponding `transform` function is defined as follows:
+
+  ```
+  class Transformation {
+      
+      @Inject extension CoolingBuilder
+      CoolingLanguageFactory factory = CoolingLanguageFactory::eINSTANCE
+  
+      def CoolingProgram transform(CoolingProgram p ) {
+          p.states += emergencyState
+          p.events += emergencyEvent
+          for (s: p.states.filter(typeof(CustomState))
+                          .filter(s|s != emergencyState)) {
+              s.events += s.eventHandler [
+                  symbolRef [ 
+                      emergencyEvent()
+                  ]
+                  changeStateStatement(emergencyState())
+              ]
+          }
+          return p;
+      }
+      
+      def create result: factory.createCustomState emergencyState() {
+          result.name = "EMERGENCY_STOP"
+      }
+      
+      def create result: factory.createCustomEvent emergencyEvent() {
+          result.name = "emergency_stop_button_pressed"
+      } 
+  }
+  ```
+
+  The special feature of `create` methods (and the reason to use them) is that they cache their results. That way, we can be sure that we always reference the same emergency state. 
+
+- The square bracket notation uses the **builder** concept, which allows building a model in a tree-like manner. Our builder is defined as follows:
+
+  ```
+  class CoolingBuilder {
+      CoolingLanguageFactory factory = CoolingLanguageFactory::eINSTANCE
+      
+      def eventHandler(CustomState it, (EventHandler)=>void handler) {
+          val res = factory.createEventHandler
+          res
+      }
+      
+      def symbolRef(EventHandler it, (SymbolRef)=>void symref) { 
+          val res = factory.createSymbolRef
+          it.events += res
+      }
+      
+      def symbol(SymbolRef it, CustomEvent event) { 
+          it.symbol = event
+      }
+      
+      def changeStateStatement(EventHandler it, CustomState target) {
+          val res = factory.createChangeStateStatement
+          it.statements += res
+          res.targetState = target
+      } 
+  }
+  ```
+
+  
 
