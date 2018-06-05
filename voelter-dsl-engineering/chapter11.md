@@ -243,5 +243,145 @@
   }
   ```
 
-  
+
+
+## 11.3 – MPS Example
+
+- MPS provides a **textgen** language for text generation at the end of the transformation chain. 
+
+  - The language is not really suitable for generating text from an AST that is **structurally different** from the generated text. In this case, a model-to-model transformation to an intermediate language should be preferred.
+  - **Figure 11.2** on page 282 gives an example for a text generator.
+
+- DSLs and language extensions usually use **model-to-model transformations.**
+
+  - **Templates** define the transformation. They are written in the target language and are annotated with macros that act as transformation instructions. 
+    - For example, to generate a condition for an `if` statement, we could create a dummy condition `true` and annotate it as such: `COPY_SRC[true] `. Inside the `COPY_SRC` *macro,* we define that the dummy condition `true` should be replaced by the value of `node.guard`, which is the actual condition.
+  - **Mapping configurations** define which templates are run when and where.
+
+- **Template-based Translation of the State Machine:**
+
+  - **Example source code:**
+
+    ```
+    module Statemachine imports nothing {
+      statemachine Counter { 
+        in events
+          start()
+          step(int[0..10] size) 
+        out events
+          started()
+          resetted()
+          incremented(int[0..10] newVal)
+        local variables
+          int[0..10] currentVal = 0 
+          int[0..10] LIMIT = 10
+        states ( initial = start ) 
+          state start {
+            on start [ ] -> countState { send started(); } 
+          }
+          state countState {
+            on step [currentVal + size > LIMIT] -> start { 
+              send resetted(); 
+            }
+            on step [currentVal + size <= LIMIT] -> countState {
+              currentVal = currentVal + size; 
+              send incremented(currentVal);
+            }
+            on start [ ] -> start { send resetted(); } 
+          }
+      }
+      
+      Counter c1; 
+      Counter c2;
+      
+      void aFunction() { 
+        trigger(c1, start);
+      } 
+    }
+    ```
+
+  - State machines are **translated** to the following C features:
+
+    - An `enum` for **states.**
+    - An `enum` for **events.**
+    - A `struct` that holds the **current state** and **local variables.**
+    - A function implementing the **behavior** of the state machine. The function takes the struct mentioned above as first argument, called `instance`, and an incoming `event`.
+
+  - The translation is organised into **phases.** Each phase either defines a transformation for an element, or the element is simply copied over.
+
+    - The **first phase** transforms the *core + statemachine* model to a *core* (the mbeddr core language) model. From the state machine, the features mentioned above are generated.
+    - The **second phase** generates C source code from the *core* model.
+
+  - **Figure 11.3** on page 283 shows a generator that inserts the enum and struct definitions into the module.
+
+    - The **template fragments** (`<TF ... TF>`) highlight the parts that are executed by the transformation.
+    - The `module dummy` is only needed because structs and enums must live in a module.
+    - Some information about the **LOOPs** is hidden behind the Inspector (see **Figure 11.5** on page 284).
+
+  - A **property macro** (denoted with a `$`) is used to replace the `name` property of each generated `EnumLiteral` with the name of the actual state or event:
+
+    ```
+    node.cEnumLiteralName();
+    ```
+
+    `cEnumLiteralName` is a **behavior method:**
+
+    ```
+    concept behavior State {
+      public string cEnumLiteralName() {
+        return this.parent : Statemachine.name + "__state_" 
+                             + this.name;
+      } 
+    }
+    ```
+
+  - Figure 11.6 on page 285 shows the expression of a **reference macro** (`->$`) that is used to target the actual enum declaration. Confer Figure 11.3, where the reference macro `->$[statemachineStates]` is placed.
+
+  - **Figure 11.7** on page 286 shows the generator that creates the body of the execution function (not the function itself, so we can embed the body in other concepts).
+
+    - `COPY_SRCL` replaces a node with a list of nodes.
+
+    - **Figure 11.8** on page 287 shows how event arguments, which are mapped to a ` void*` array, are accessed.
+
+    - The `int8 exitActions` statement is just a **dummy that will be replaced** by completely different statements. Don't be confused by that! The real list of statements is created by the following function:
+
+      ```
+      (node, genContext, operationContext)->sequence<node<>> { 
+        if (node.parent : State.exitAction != null) {
+          return node.parent : State.exitAction.statements; 
+        }
+        new sequence<node<>>(empty); 
+      }
+      ```
+
+- **Procedural Transformation of a Test Case:**
+
+  - Transformations can be written **manually** with the MPS API, by invoking a **mapping script** from the mapping configuration.
+
+  - **Example:** We will build the following code during the example.
+
+    ```
+    module SomeModule imports nothing {
+      exported test case testCase1 { }
+        
+      exported int32 main(int32 argc, string*[] argv) { 
+        return test testCase1;
+      } 
+    }
+    ```
+
+    The following script builds the code above:
+
+    ```
+    node<ImplementationModule> immo = build ImplementationModule 
+      name = #(aNamePassedInFromAUserDialog)
+      contents += tc:TestCase
+              name = "testCase1"
+              type = VoidType
+              contents += #(MainFunctionHelper.createMainFunction())
+                body = StatementList statements += ReturnStatement
+                        expression = ExecuteTestExpression
+                                      tests += TestCaseRef 
+                                                 testcase -> tc
+    ```
 
