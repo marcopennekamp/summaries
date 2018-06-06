@@ -250,3 +250,11 @@
 
 
 
+## 12.2 – An Interpreter in MPS
+
+- Building an interpreter in MPS is **very similar** to building one in Xtext.
+- We can add a **dispatch expression** to BaseLanguage. Figure 12.1 on page 307 shows how such a language extension might be used.
+- Using the projectional-style editing of MPS, we can **show read-only results** in the editor, such as the result of an interpreter.
+
+
+
