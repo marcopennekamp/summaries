@@ -40,3 +40,35 @@ This chapter discusses IDE services that are **not automatically derived** from 
     ```
 
     The `model` parameter represents the program element for which the symbol should be completed.
+
+- **An Example with MPS:**
+
+  - The following code customizes the code completion menu for function calls:
+
+    ```
+    link {function} 
+      ...
+      presentation :
+        (parameterNode, visible, smartReference, 
+           inEditor, ...)->string {
+          parameterNode.signatureInfo(); 
+        }
+    ```
+
+    The method `signatureInfo` creates a string that shows the complete function signature.
+
+  - In contrast to Xtext, we don't have to specify the **inserted text,** because MPS establishes the reference based on the UUID of the target node.
+
+- **Code Completion for Simple Properties:**
+
+  - In **Xtext,** **other kinds of properties** can also be auto-completed. Instead of consulting a scope, which is reserved for references, we have to build a list of proposals.
+  - In **MPS,** such behavior is customized in the **editor definition.** Figure 13.2 on page 316 shows how to suggest a variable name in a local variable declaration.
+
+- **Editor Templates:**
+
+  - **Templates** are code snippets that can be selected in the code completion menu.
+  - In **Xtext,** templates can be defined as part of the language or by IDE users (see figure 13.3 on page 317).
+  - In **MPS,** you can use intentions or cell menus. The latter is shown in figure 13.4 on page 317.
+
+
+
