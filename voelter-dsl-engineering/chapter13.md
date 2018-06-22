@@ -366,5 +366,100 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+##13.6 – Refactoring
+
+- **Renaming in Xtext** is available without configuration.
+
+- **Introduce Local Variable in MPS:**
+
+  - **Example:** We have the following code:
+
+    ```c
+    int8 someFunction(int8 v) {
+        int8 y = somethingElse(v * FACTOR); 
+        if (v * FACTOR > 20) {
+            return 1; 
+        } else {
+            return 0; 
+        }
+    }
+    ```
+
+    Since `v * FACTOR` is duplicated, we want to refactor it so that it's contained in a local variable:
+
+    ```c
+    int8 someFunction(int8 v) {
+        int8 product = v * FACTOR;
+        int8 y = somethingElse(product); 
+        if (product > 20) {
+            return 1; 
+        } else {
+            return 0; 
+        }
+    }
+    ```
+
+    The following code is a bit outdated (MPS has since introduced a better separation between keystrokes and choosers on the one hand, and the refactoring itself on the other), but it should illustrate the general idea. We first **declare** the refactoring:
+
+    ```
+    refactoring introduceLocalVariable ( "Introduce Local Variable" )
+    
+    keystroke: <ctrl+alt>+<V>
+    target: node<Expression> 
+    allow multiple: false
+    
+    isApplicableToNode(node)->boolean {
+      node.ancestor<Statement>.isNotNull;
+    }
+    ```
+
+    The constraint that an expression can only be extracted when it is inside a statement ensures that we don't try to introduce a local variable in a global scope. The refactoring also requires a **parameter:**
+
+    ```
+    parameters:
+      varName chooser: type: string
+                       title: Name of the new Variable 
+    init(refactoringContext)->boolean {
+      return ask for varName; 
+    }
+    ```
+
+    The `init` block asks the user for the `varName`. Implementation of the **refactoring algorithm:**
+
+    ```
+    node<Expression> targetExpr = refactoringContext.node; node<Statement> targetStmt = targetExpr.ancestor<Statement>; 
+    int index = targetStmt.index;
+    
+    // Find all expressions matching the extracted expression.
+    nlist<Expression> matchingExpressions = new nlist<Expression>; sequence<node<>> siblings = targetStmt.siblings
+        .union(new singleton<node<Statement>>(stmt)); 
+    foreach s in siblings {
+      if (s.index >= index) {
+        foreach e in s.descendants<Expression> {
+          if (MatchingUtil.matchNodes(targetExpr, e)) {
+            matchingExpressions.add(e);
+          }
+        }
+      }
+    }
+    
+    // Add the local variable before the first expression.
+    node<LocalVariableDeclaration> lvd = 
+        new node<LocalVariableDeclaration>(); 
+    lvd.name = varName;
+    lvd.type = targetExpr.type.copy;
+    lvd.init = targetExpr.copy;
+    targetStmt.add prev-sibling(lvd);
+    
+    // Replace the matching expressions with our new local variable.
+    foreach e in matchingExpressions { 
+      node<LocalVarRef> ref = new node<LocalVarRef>(); 
+      ref.var = lvd;
+      e.replace with(ref);
+    }
+    ```
+
+
+
 
 
