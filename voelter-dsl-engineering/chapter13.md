@@ -72,3 +72,73 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.2 – Syntax Coloring
+
+- Syntax coloring has two purposes: **Syntactic highlighting** (e.g. for keywords) and **semantic highlighting** (calculated based on the AST, e.g. unreachable code).
+
+- **An Example with MPS:**
+
+  - In MPS, syntax coloring is achieved with **style properties.** See figure 13.5 on page 318 for an example.
+  - **Semantic highlighting** can be achieved by embedding query expression. See figure 13.6 on page 318.
+
+- **An Example with Xtext:**
+
+  - Syntax coloring in Xtext is performed in **two phases:**
+
+    1. **Define the styles** to be applied to text parts:
+
+       ```java
+       public class CLHighlightingConfiguration extends
+               DefaultHighlightingConfiguration {
+           public static final String VAR = "var";
+           
+           @Override
+           public void configure(
+                   IHighlightingConfigurationAcceptor acceptor) {
+               super.configure(acceptor);
+               acceptor.acceptDefaultHighlighting(
+                   VAR, "variables", varTextStyle()
+               ); 
+           }
+       
+           private TextStyle varTextStyle() { 
+               TextStyle t = defaultTextStyle().copy(); 
+               t.setColor(new RGB(100,100,200)); 
+               t.setStyle(SWT.ITALIC | SWT.BOLD ); 
+               return t;
+           } 
+       }
+       ```
+
+       The user can change the style in their own IDE preferences.
+
+    2. **Associate the style with the program syntax:**
+
+       ```java
+       public void provideHighlightingFor(XtextResource resource,
+               IHighlightedPositionAcceptor acceptor) {
+           EObject root = resource.getContents().get(0);
+           TreeIterator<EObject> eAllContents = root.eAllContents();
+           while (eAllContents.hasNext()) {
+               EObject ref = (EObject) eAllContents.next(); 
+               if (ref instanceof SymbolRef) {
+                   SymbolDeclaration sym = ((SymbolRef) o)
+                       .getSymbol(); 
+                   if (sym instanceof Variable) {
+                       ICompositeNode n =
+                           NodeModelUtils.findActualNodeFor(ref);
+                       acceptor.addPosition(
+                           n.getOffset(),
+                           n.getLength(),
+                           CLHighlightingConfiguration.VAR
+                       );
+                   }
+               }
+           }
+       }
+       ```
+
+       We check whether a symbol is a variable, because there are other kinds of symbols we don't want to highlight with the `VAR` highlighting configuration.
+
+
+
