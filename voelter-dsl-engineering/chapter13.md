@@ -248,3 +248,113 @@ This chapter discusses IDE services that are **not automatically derived** from 
     }
     ```
 
+
+
+## 13.5 – Quick Fixes
+
+- **Quick fixes** are automatic fixes for constraint violations, which have to be activated manually by the user.
+
+- **Quick Fixes in Xtext:**
+
+  - Quick fixes can be **implemented** on the concrete syntax or the abstract syntax level. The latter requires a formatting step to update the code in question.
+
+  - **Example:** Consider the following constraint:
+
+    ```java
+    public static final String VARIABLE_LOWER_CASE = 
+        "VARIABLE_LOWER_CASE";
+    
+    @Check
+    public void checkVariable(Variable v) {
+        if (!Character.isLowerCase(v.getName().charAt(0))) {
+            warning(
+                "Variable name should start with a lower case letter",
+                al.getSymbolDeclaration_Name(), 
+                VARIABLE_LOWER_CASE
+            );
+        } 
+    }
+    ```
+
+    The quick fix is tied to the constant `VARIABLE_LOWER_CASE`. This is referenced by the quick fix:
+
+    ```java
+    @Fix(CoolingLanguageJavaValidator.VARIABLE_LOWER_CASE) 
+    public void capitalizeName(final Issue issue,
+            IssueResolutionAcceptor acceptor) { 
+        acceptor.accept(issue, "Decapitalize name", 
+            "Decapitalize the name.", "upcase.png", 
+            new IModification() {
+                public void apply(IModificationContext context) 
+                        throws BadLocationException {
+                    IXtextDocument xtextDocument =
+                        context.getXtextDocument(); 
+                    String firstLetter =
+                        xtextDocument.get(issue.getOffset(), 1);
+                    xtextDocument.replace(
+                        issue.getOffset(), 1,
+                        firstLetter.toLowerCase()
+                    );
+                } 
+            }
+        );
+    }
+    ```
+
+    The fix above uses the text API to replace the first letter. You can also affect the model on the **AST level,** as mentioned above:
+
+    ```java
+    @Fix(CoolingLanguageJavaValidator.VARIABLE_LOWER_CASE)
+    public void fixName(final Issue issue, 
+            IssueResolutionAcceptor acceptor) {
+        acceptor.accept(issue, "Decapitalize name", 
+            "Decapitalize the name", "upcase.png", 
+            new ISemanticModification() {
+                public void apply(EObject element,
+                        IModificationContext context) {
+                    ((Variable) element).setName(
+                        Strings.toFirstLower(issue.getData()[0])
+                    );
+                } 
+            }
+        );
+    }
+    ```
+
+    After the change, the formatter is invoked to serialize the AST back to concrete syntax.
+
+- **Quick Fixes in MPS:**
+
+  - Being a projectional editor, quick fixes in MPS always work on the **abstract syntax.** They can be selected in the intentions menu.
+
+  - **Example:** Take the following constraint:
+
+    ```
+    checking rule check_INameAllUpperCase { 
+      applicable for concept = INameAllUpperCase as a   
+    
+      do {
+        if (!(a.name.equals(a.name.toUpperCase()))) {
+          warning "name should be all upper case" -> a; 
+        }
+      }
+    }
+    ```
+
+    The following quick fix uppercases the name and thus fixes the problem of the constraint:
+
+    ```
+    quick fix fixAllUpperCase 
+    
+    arguments:
+      node<IIdentifierNamedConcept> node
+    
+    description(node)->string { 
+      "Fix name";
+    }
+    
+    execute(node)->void {
+      node.name = node.name.toUpperCase();
+    }
+    ```
+
