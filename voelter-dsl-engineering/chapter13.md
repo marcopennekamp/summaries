@@ -198,3 +198,53 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.4 – Pretty-Printing
+
+- A **pretty printer** creates human-readable code from an AST.
+
+- Pretty printers are useful for automatic **formatting** and also AST modifications (e.g. for quick fixes).
+
+- **Pretty-Printing in MPS:** Since MPS is a projectional editor, pretty-printing does not really exist, since the projection defines how the AST is rendered.
+
+- **Pretty-Printing in Xtext:**
+
+  - The language's **`Formatter`** can be used to pretty-print.
+
+  - **Example:** The following code should be formatted:
+
+    ```
+    state Hello : entry { if true { } }
+    ```
+
+    This should be the result:
+
+    ```
+    state Hello: 
+        entry {
+            if true { } 
+        }
+    ```
+
+    We have the following formatter to accomplish this task:
+
+    ```java
+    protected void configureFormatting(FormattingConfig c) {
+        CoolingLanguageGrammarAccess f =
+            (CoolingLanguageGrammarAccess) getGrammarAccess();
+        c.setNoSpace().before(f.getCustomStateAccess()
+            .getColonKeyword_3());
+        c.setIndentationIncrement().after(f.getCustomStateAccess()
+            .getColonKeyword_3());
+        c.setLinewrap().before(f.getCustomStateAccess()
+            .getEntryKeyword_5_0());
+        c.setLinewrap().after(f.getCustomStateAccess()
+            .getLeftCurlyBracketKeyword_5_1());
+        c.setIndentationIncrement().after(f.getCustomStateAccess()
+            .getLeftCurlyBracketKeyword_5_1());
+        c.setLinewrap().before(f.getCustomStateAccess()
+            .getRightCurlyBracketKeyword_5_3());
+        c.setIndentationDecrement().before(f.getCustomStateAccess()
+            .getRightCurlyBracketKeyword_5_3());
+    }
+    ```
+
