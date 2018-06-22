@@ -358,3 +358,13 @@ This chapter discusses IDE services that are **not automatically derived** from 
     }
     ```
 
+- **Model Synchronization via Quick Fixes:**
+
+  - Quick fixes in MPS can be **executed automatically.**
+  - Different model parts can be **synchronized** with this approach. A constraint check detects an inconsistency and the quick fix is automatically applied.
+  - **Example:** Class methods that are declared by an interface can have their signature synchronized when the interface changes.
+
+
+
+
+
