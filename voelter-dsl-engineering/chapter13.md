@@ -142,3 +142,59 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.3 – Go-to-Definition and Find References
+
+- A **Go-to-Definition** feature allows the user to follow a reference to its definition.
+
+- Following and finding references **works automatically** in all discussed language workbenches.
+
+- The following examples illustrate how the **default behavior can be changed.**
+
+- **Customizing the Target with Xtext:**
+
+  - "Changing" the go-to behavior means **defining a new hyperlink.** Thus you can provide a hyperlink for an element that is not a reference. You can also have **multiple hyperlinks** for the same element.
+
+  - You have to **implement** the `IHyperlinkHelper` interface with the following method:
+
+    ```java
+    public void createHyperlinksTo(XtextResource from, Region region,
+            EObject to, IHyperlinkAcceptor acceptor) {
+        if (to instanceof TheEConceptIAmInterestedIn) {
+            EObject target = // find the target of the hyperlink 
+            super.createHyperlinksTo(from, region, target, acceptor);
+        } else {
+            super.createHyperlinksTo(from, region, to, acceptor);
+        }
+    }
+    ```
+
+- **Customized Finders in MPS:**
+
+  - In mbeddr C, **references to interfaces** can mean sub-interfaces, or a provided or required interface in a component.
+
+  - In this example, we want to distinguish between these usage patterns when **finding usages** of an interface.
+
+  - MPS provides **finders,** which act like filters in the Find Usages dialog (see Figure 13.8 on page 322).
+
+  - A finder **implementation:**
+
+    ```
+    finder findProviders for concept Interface 
+      description: Providers
+      
+      find(node, scope)->void {
+        nlist<> refs = execute NodeUsages ( node , <same scope> );   
+        foreach r in refs.select(it|it.isInstanceOf(ProvidedPort)) {
+          add result r.parent ; 
+        }
+      }
+      
+      getCategory(node)->string { 
+        "Providers";
+      }
+    ```
+
+    The `execute` call **delegates** to the existing finder `NodeUsages`. The function `getCategory` returns a string that is used to categorize the results (when multiple finders have been used, see Figure 13.9 on page 322).
+
+
+
