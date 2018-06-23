@@ -499,3 +499,66 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.8 – Outline
+
+- An **outline** is an overview of some model contents, e.g. file contents.
+
+- An outline often **presents the AST** down to a specific level, which has to be configured.
+
+- Often, contents are also **grouped by their language concept.**
+
+- **Customizing the Structure in Xtext:**
+
+  - The **`OutlineTreeProvider`** can be used to customize the outline.
+
+  - **Example:** Organize cooling language file contents by showing all programs and then all tests.
+
+    ```java
+    protected void _createChildren(DocumentRootNode parentNode, 
+            Model m) { 
+        for (EObject prg : m.getCoolingPrograms()) {
+            createNode(parentNode, prg); 
+        }
+        for (EObject t : m.getTests()) {
+            createNode(parentNode, t); 
+        }
+    }
+    ```
+
+  - **Example:** Show variables and states in separate sections.
+
+    ```java
+    protected void _createChildren(IOutlineNode parentNode,
+            CoolingProgram p) { 
+        TextOnlyOutlineNode vNode = new TextOnlyOutlineNode(
+            parentNode, imageHelper.getImage("variable.png"),
+            "variables"
+        ); 
+        for (EObject v: p.getVariables()) {
+            createNode(vNode, v); 
+        }
+        TextOnlyOutlineNode sNode = new TextOnlyOutlineNode(
+            parentNode, imageHelper.getImage("state.png"), 
+            "states"
+        );
+        for (EObject s: p.getStates()) { 
+            createNode(sNode, s);
+        } 
+    }
+    ```
+
+    Using the following class:
+
+    ```java
+    public class TextOnlyOutlineNode extends AbstractOutlineNode {
+        protected TextOnlyOutlineNode(IOutlineNode parent, 
+                Image image, Object text) {
+            super(parent, image, text, false); 
+        }
+    }
+    ```
+
+- **The Outline in MPS:** The outline in MPS is not customizable. Additional views (*tools*) can be added to implement a whole custom outline view.
+
+
+
