@@ -562,3 +562,30 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.9 – Code Folding
+
+- **Folding in Xtext:**
+
+  - Code folding for concepts that cover **more than one line** is automatically provided.
+
+  - The default behavior can be turned off by implementing **`DefaultFoldingRegionProvider`**:
+
+    ```java
+    public class CLFoldingRegionProvider extends
+            DefaultFoldingRegionProvider {
+        @Override
+        protected boolean isHandled(EObject eObject) {
+            if (eObject instanceof CustomState) { 
+                return false;
+            }
+            return super.isHandled(eObject); 
+        }
+    }
+    ```
+
+- **Folding in MPS:**
+
+  - Folding can be specified for **collections,** by setting the `uses folding` property to `true` or alternatively a `query`, which dynamically determines whether the collection should be foldable.
+  - For foldable collections, we have to provide a **cell** that is rendered when the collection is folded. See Figure 13.13 on page 337.
+  - You can also provide **conditonally projected parts,** which are only shown when a detailed view is desired. See Figures 13.14 and 13.15 on page 337 and Figure 13.16 on page 338.
+
