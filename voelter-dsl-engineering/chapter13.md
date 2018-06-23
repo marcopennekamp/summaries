@@ -461,5 +461,41 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.7 – Labels and Icons
+
+- **Labels and icons** are used for language concepts, for example in the outline view and code completion menu.
+
+- **Labels and Icons in Xtext:**
+
+  - Xtext generates a **`LabelProvider`**, in which you can override a `text` method that returns the label text. The `image` method can be overridden to specify the icon.
+
+  - **Examples:**
+
+    ```java
+    public class CoolingLanguageLabelProvider 
+            extends DefaultEObjectLabelProvider {
+        String text(CoolingProgram prg) {
+            return "program " + prg.getName();
+        }
+    
+        String image(CoolingProgram prg) { 
+            return "program.png";
+        }
+    
+        String text(Variable v) {
+            return v.getName() + ": " + v.getType();
+        }
+    
+        String image(Variable v) { 
+            return "variable.png";
+        } 
+    }
+    ```
+
+- **Labels and Icons in MPS:**
+
+  - The **`getPresentation`** behavior method can be overridden for a specific concept to define the **label.**
+  - The **icon** can be selected in the language concept inspector.
+
 
 
