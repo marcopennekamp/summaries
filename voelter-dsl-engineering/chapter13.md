@@ -589,3 +589,17 @@ This chapter discusses IDE services that are **not automatically derived** from 
   - For foldable collections, we have to provide a **cell** that is rendered when the collection is folded. See Figure 13.13 on page 337.
   - You can also provide **conditonally projected parts,** which are only shown when a detailed view is desired. See Figures 13.14 and 13.15 on page 337 and Figure 13.16 on page 338.
 
+
+
+## 13.10 – Tooltips/Hover
+
+- **Tooltips** may, for example, provide information about documentation or the target element of a reference. Toolstips are also called hovers.
+- **Xtext:**
+  - Tooltips can be **customized** to varying levels. Xtext tooltips consist of a one-line summary and more extensive documentation.
+  - **Simple customization:** Keep the structure of a tooltip, but change the text.
+  - Override the `getFirstLine` method in `DefaultEObjectHoverProvider` to change the **one-line summary.**
+  - Override the `getDocumentation` method in `IEObjectDocumentationProvider` to change the **documentation.**
+- **MPS:** MPS does not provide tooltips. You can display additional information in the **inspector** (see Figure 13.17 on page 339 and Figure 13.18 on page 340).
+
+
+
