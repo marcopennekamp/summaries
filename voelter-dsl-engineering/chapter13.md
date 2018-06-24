@@ -603,3 +603,7 @@ This chapter discusses IDE services that are **not automatically derived** from 
 
 
 
+## 13.12 – Diff and Merge
+
+- **Text-based tools** like Xtext and Spoofax can use existing diff/merge tools.
+- **Projectional editors** like MPS have to provide custom support for diff/merge, which MPS does.
