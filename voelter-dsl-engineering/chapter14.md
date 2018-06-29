@@ -391,4 +391,13 @@
 
 - **SAT/SMT Solving:**
 
-  - 
+  - **SAT:** Satisfiability of sets of boolean equations (NP-complete).
+  - **SMT:** An extension of SAT. Allows additional constructs such as linear arithmetic, arrays or bit-vectors.
+  - SMT solving can be used to **verify decision tables** in mbeddr (see Figure 14.7 on page 362 for an example decision table), by checking that all cases are handled.
+
+- **Model Checking and Transformations:** Even though models may pass the model checker on the **DSL-level,** the generator may introduce problems. Approaches:
+
+  - **Manually test the generator.**
+  - Some model checking tools **generate test cases.**
+  - **Verify the generated code.**
+
