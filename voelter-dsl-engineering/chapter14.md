@@ -401,3 +401,53 @@
   - Some model checking tools **generate test cases.**
   - **Verify the generated code.**
 
+
+
+## 14.5 – Testing Editor Services
+
+- Approaches for **testing IDE services:**
+
+  - Use APIs provided by the IDE that **hook into UI aspects.**
+  - Use **generic UI testing tools** (simulate typing and clicking, check the results).
+  - **Unit test algorithmic logic** (the "hard" parts).
+
+- For non-trivial problems, **unit testing the UI logic is recommended.**
+
+- Specific UI testing is **not recommended** by the author, because it is very cumbersome, we implicitly test the UI by using the editor and the language workbench provides a generic UI that is already expected to work.
+
+- **An Example with MPS:**
+
+  - Since MPS is a projectional editor, a **broken editor** will have direct impact on the code you can write. The editor may simply not allow creating a piece of code that should be correct.
+  - MPS provides a **special DSL for editor testing** (see Figure 14.8 on page 364).
+
+- **An Example with Xtext/Xpect:**
+
+  - **Xpect** can be used for integration testing. 
+
+  - Test expectations are embedded **as comments.**
+
+  - **Example:**
+
+    ```
+    Model: greetings+=Greeting*;
+    Greeting: ’Hello’ name=ID ’!’;
+    ```
+
+    The following code tests **code completion:**
+
+    ```
+    // XPECT_TEST org.example.MyJUnitContentAssistTest END_TEST
+    
+    // XPECT contentAssist at |Hel --> Hello 
+    Hello Peter!
+    
+    // XPECT contentAssist at |! --> ! 
+    Hello Heiko!
+    ```
+
+    The `|` marks the the cursor position, where content assist should be called. With `|Hel`, we search for `Hel` in the greeting `Hello Peter!`. The expectation is that content assist suggests `Hello`.
+
+  - Xpect allows you to use **generic test methods** (such as `contentAssist`), which return a string that is compared with the expected result.
+
+
+
