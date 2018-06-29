@@ -451,3 +451,11 @@
 
 
 
+## 14.6 – Testing for Language Appropriateness
+
+- Language appropriateness **cannot be tested** automatically. This includes questions such as:
+  - Is the DSL **domain understood completely?**
+  - Does the DSL **cover the whole domain?**
+  - **Are abstractions appropriate?**
+  - Is the **notation** usable and efficient?
+
