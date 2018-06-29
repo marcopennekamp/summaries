@@ -281,7 +281,114 @@
 
 
 
+## 14.4 – Formal Verification
 
+- Verification checks the **whole program** instead of single (test) cases, but is not perfect (e.g. halting problem).
 
+- Different **algorithms** are used to perform formal verification, including model checking, SAT solving, SMT solving and abstract execution.
 
+- **Model Checking State Machines:**
 
+  - **Model checking** can verify state machines as such:
+
+    - **Functionality** is expressed as a state machine.
+    - **Properties** about the behavior of the state machine can be specified, which must be true for every execution of the state machine. For **example:** When you go to state X, the preceding state must be Y.
+    - The **model checker** is run with the state machine and the properties as inputs.
+    - **Output:** Approval or a counterexample. (Or out of memory.)
+
+  - Naively, the model checker would perform an **exhaustive search.**
+
+    - **State space explosion:** The more complex the state machine, the more possibilites – up to an untenable amount of different states.
+
+  - **Other algorithms** don't need to perform an exhaustive search (e.g. bounded model checking stops after a set amount of steps). 
+
+    - Some inputs are still **too large.** Reformulating the input sometimes helps.
+
+  - Properties can be **elaborate,** often expressed in some **temporal logic.**
+
+    - **Example:** *It is always true that after we have been in state X, we will eventually reach state Y.* (**Fairness;** the state machine does not get stuck in some state.)
+    - **Example:** *Whatever the state we are currently in, it is always possible to get to state X.* (**Liveliness;** a state can always be reached.)
+    - **Example:** *It is never possible to get to a state X without having gone through state Y before.* (**Safety;** transitioning to a state (x) ensures that other measures (y) have been taken before the state is reached.)
+
+  - Since model checking inputs are sometimes hard to work with, mbeddr C provides a **custom syntax** that is then translated to input data for the NuSMV model checker. Notably, the syntax **abstracts** from the underlying logic.
+
+  - **Example:** We want to test the following counter state machine:
+
+    ```
+    verifiable statemachine Counter { 
+      in events
+        start()
+        step(int[0..10] size) 
+      local variables
+        int[0..100] currentVal = 0
+        int[0..100] LIMIT = 10
+      states ( initial = initialState )
+        state initialState {
+          on start [ ] -> countState { }
+        }
+        state countState {
+          on step [currentVal + size > LIMIT] -> initialState { } 
+          on step [currentVal + size <= LIMIT] -> countState {
+            currentVal = currentVal + size; 
+          }
+          on start [ ] -> initialState { } 
+        }
+    }
+    ```
+
+    Output for some properties that the model checker checks **by default:**
+
+    ```
+    State ’initialState’ can be reached                        SUCCESS
+    Variable ’currentVal’ is always between its defined bounds SUCCESS
+    State ’countState’ has deterministic transitions           SUCCESS
+    Transition 0 of state ’initialState’ is not dead           SUCCESS
+    ```
+
+    To **provoke an error,** we change the following code in the model:
+
+    ```
+    on step [currentVal + size >= LIMIT] -> initialState { } 
+    on step [currentVal + size <= LIMIT] -> countState {
+      currentVal = currentVal + size; 
+    }
+    ```
+
+    It leads to the following message (among others) of the model checker:
+
+    ```
+    State ’countState’ contains nondeterministic transitions    FAIL 4
+    ```
+
+    The `4` means that there is a **trace** with four steps. You can click on the property to view the trace:
+
+    ```
+    State initialState
+      LIMIT 10 
+      currentVal 0
+    State initialState
+      in_event: start start()
+      LIMIT 10 
+      currentVal 0
+    State countState
+      in_event: step step(10)
+      LIMIT 10 
+      currentVal 0
+    State initialState
+      LIMIT 10 
+      currentVal 10
+    ```
+
+  - **Custom properties:** 
+
+    ```
+    verification conditions
+      never LIMIT != 10
+      always eventually reachable initialState
+    ```
+
+    Property 1 ensures that the `LIMIT` "constant" is never changed.
+
+- **SAT/SMT Solving:**
+
+  - 
