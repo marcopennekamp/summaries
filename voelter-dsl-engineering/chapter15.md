@@ -114,3 +114,9 @@ This section is concerned with debugging the language definition itself, instead
   - Implement **inspection** functionality.
   - Allow **changing variable values** from the simulator.
 
+#### 15.2.4 – Automatic Debugging for Xbase-based DSLs
+
+- **Xbase** is Xtext's reusable expression language. A DSL using Xbase defines high-level aspects itself, but uses Xbase for statements and expressions.
+- When generating Java code, the DSL AST is **mapped to the Java AST.**
+- During this process, DSL code and the corresponding Java code are **automatically linked.**
+- The **Java debugger** can use this trace information.
