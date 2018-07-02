@@ -75,3 +75,29 @@ This section is concerned with debugging the language definition itself, instead
 
 
 
+## 15.2 – Debugging DSL Programs
+
+- Debugging on the **target language level** can be useful for the language designer, to find problems in the execution engine, or for programmers that know the target language.
+- In other cases, debugging should happen at the **DSL level.**
+- This kind of debugging only makes sense for **DSLs with behavior.**
+- **Challenges** of building a debugger:
+  - Creating the **debugging user interface** (usually provided by the IDE).
+  - **Control and inspection** of the debugged program.
+    - Easy with **interpreters,** since they can be directly controlled.
+    - **Transformations:** Either the execution infrastructure provides debug support or we need to create a debug version of programs that communicate with the debugger. The latter has its limitations and ugliness, so should only be used as a last resort.
+
+#### 15.2.1 – Print Statements – a Poor Man's Debugger
+
+- Since implementing debuggers can be costly, we can also provide a simpler means with **print statements.**
+
+- **Example:** mbeddr `report` statements.
+
+- For non-imperative languages or languages without variables, we can use **inlined** print expressions:
+
+  ```
+  Collection[Type] argTypes = 
+    aClass.operations.print("operations:")
+          .arguments.print("arguments:")
+          .type;
+  ```
+
