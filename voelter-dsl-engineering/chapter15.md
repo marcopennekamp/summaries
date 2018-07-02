@@ -101,3 +101,16 @@ This section is concerned with debugging the language definition itself, instead
           .type;
   ```
 
+#### 15.2.2 – Automatic Program Tracing
+
+- **Automatic tracing** logs all execution steps in a tree-like data structure.
+- **Example:** See Figure 15.6 on page 379.
+
+#### 15.2.3 – Simulation as an Approximation for Debugging
+
+- An interactive interpreter (show variables, events, running tasks; provide a button to single-step; etc.) is essentially a **simulator.** A simulator is fit to be used for debugging, since it covers many of the areas a debugger would.
+- Steps to **expand an interpreter** so that it becomes a simulator:
+  - Make the **execution controllable** from the simulator (breakpoints, single-step).
+  - Implement **inspection** functionality.
+  - Allow **changing variable values** from the simulator.
+
