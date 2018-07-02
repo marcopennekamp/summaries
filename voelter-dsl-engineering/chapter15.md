@@ -21,3 +21,57 @@ This section is concerned with debugging the language definition itself, instead
   - Pressing Ctrl+Shift+T **shows the type** of a program element. This interface also shows which rules produce a type error.
   - MPS can also show the **type system trace** for a node in the program (see Figure 15.3 on page 372), which shows the state of the solver that tries to solve typing constraints.
 
+#### 15.1.3 – Debugging Interpreters and Transformations
+
+- **Debugging an interpreter** can be accomplished by using the debugger of the language the intepreter is written in.
+
+- **Debugging transformations** is non-trivial, because:
+
+  - Transformations are usually written in their own DSL. This requires a **specialized debugger.**
+  - **Multi-step transformations** complicate debugging. It should be possible to access intermediate models and trace particular elements through the multiple steps.
+
+- **Xtext:** Debugging transformations and interpreters written in **Xtend** is straight-forward, because they are normal programs. Thus, you can use the **Xtend debugger.**
+
+- **MPS:**
+
+  - Transformation debugging has two ingredients, showing the **mapping partitioning** (i.e. the transformation schedule/order, which also reflects transformation priorities) and **intermediate models.**
+
+  - **Example:** We show the mapping partition for a program.
+
+    ```
+    module Simple imports nothing {
+      message list messages {
+        INFO aMessage() active: something happened
+      }
+    
+      exported int32 main(int32 argc, int8*[] argv) { 
+        report (0) messages.aMessage();
+        return 0;
+      } 
+    }
+    ```
+
+    Mapping partition:
+
+    ```
+    [1] com.mbeddr.core.modules.gen.generator.template.main.removeCommentedCode 
+    [2]
+    com.mbeddr.core.util.generator.template.main.reportingPrintf
+    [3]
+    com.mbeddr.core.buildconfig.generator.template.main.desktop com.mbeddr.core.modules.gen.generator.template.main.main
+    ```
+
+  - **Example:** An intermediate model after the transformation of the `report` statement.
+
+    ```
+    module Simple imports nothing {
+      exported int32 main(int32 argc, int8*[] argv) { 
+        printf("$$ aMessage: something happened "); 
+        printf("@ Simple:main:0#240337946125104144 \n "); 
+        return 0;
+      } 
+    }
+    ```
+
+
+
