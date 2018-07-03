@@ -199,4 +199,68 @@ This section is concerned with debugging the language definition itself, instead
 
   - Figure 15.10 on page 384 shows the **generator.**
 
-- 
+- **Developing the Debug Behavior:**
+
+  - The **debugger specification** is contained in the ForeachLanguage.
+
+  - For **breakpoint** support, the *concept* has to implement the `IBreakpointSupport` marker interface. 
+
+    - For the example (`ForEachStatement`), it is already implemented, because `Statement` already does.
+
+  - **Single-step execution** is supported by the `ISteppable` interface.
+
+    - For the example, we have to **override** the methods that define step over and step into behavior. The step methods are implemented by setting breakpoints at all possible end locations.
+
+    - **Step over:** If the array is empty/iteration is finished, we end up at a statement *after* the `foreach`. Otherwise, we go to the first line of the body.
+
+      ```java
+      void contributeStepOverStrategies(list<IDebugStrategy> res) {
+        ancestor
+        statement list: this.body 
+      }
+      ```
+
+      This definition is using a DSL included in the mbeddr debugger framework!
+
+    - **Step into:** We instruct the debugger to step into expressions for `array` and `len` (via `IStepIntoable)`:
+
+      ```java
+      void contributeStepIntoStrategies(list<IDebugStrategy> res) {   
+        subtree: this.array
+        subtree: this.len
+      }
+      ```
+
+    - **Customize watches** with `IWatchProvider`:
+
+      ```java
+      void contributeWatchables(list<UnmappedVariable> unmapped, 
+          list<IWatchable> mapped) {
+        hide "__c"
+        map "__it" to "it"
+          type: this.array.type : ArrayType.baseType 
+          category: WatchableCategories.LOCAL_VARIABLES 
+          context: this
+      }
+      ```
+
+      First, we hide the counter `__c`. Then we map `__it` to the watch variable `it`.
+
+- **Debugger Framework Architecture:**
+
+  - The framework uses a **native C debugger** for the core debugging.
+  - **Trace data** is used to link the C code back to the DSL-level.
+  - See Figure 15.11 on page 386 for an overview. The **Mapper** is driven by the **Debugger UI** and controls the C debugger. It uses the debug specification of the language.
+  - A **step over** is executed in the following way:
+    - Ask the current node for **step over strategies,** which are the locations the debugger could end up after the operation. Query trace data for these *end locations* in C code.
+    - Set **breakpoints** for the end locations in the C code.
+    - **Resume execution** and then **get the call stack.**
+    - Query trace data to translate the **stack to the DSL-level.**
+    - Get **watchable symbols** and their values.
+    - **Create watchables** from symbols and values (via `WatchableProvider`).
+
+- **Debugger Specification:**
+
+  - See the example above!
+  - **Stack frames:** Callables on the DSL-level are not necessarily callables on the target language level and vice-versa. Concepts that are callable implement `IStackFrameContributor`.
+
