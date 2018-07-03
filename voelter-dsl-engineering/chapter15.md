@@ -120,3 +120,83 @@ This section is concerned with debugging the language definition itself, instead
 - When generating Java code, the DSL AST is **mapped to the Java AST.**
 - During this process, DSL code and the corresponding Java code are **automatically linked.**
 - The **Java debugger** can use this trace information.
+
+#### 15.2.5 – Debuggers for an Extensible Language
+
+- This section describes an **exensible debugger** for mbeddr C.
+
+- **Requirements of the Debugger:** 
+
+  - We want **features** such as breakpoints, single-step execution, watches (display variables, arguments and other state), and stack frames (display call hierarchy).
+  - **Language extensions** lead to different kinds of breakpoints, watches, etc. than the base language. Each language extension is thus supported by a **debugger extension.**
+  - **Modularity:** Since language extensions are modular, debugger extensions must be as well. New extensions must not require changing base language debugging.
+  - **Framework Genericity:** The core debugger infrastructure must be flexible enough so that no changes to it are required when adding an extension.
+  - **Simple Debugger Definition:** Language extensions are relatively simple to define, so debugger extensions should be too.
+  - **Limited Overhead:** Since mbeddr is used for embedded systems, there has to be a limit on binary size added by the debugger.
+  - **Debugger Backend Independence**
+
+- **An Example (Language) Extension:**
+
+  - We add a **`foreach` statement:**
+
+    ```c
+    int8 s = 0;
+    int8[] a = {1, 2, 3}; 
+    foreach (a sized 3) {
+        s += it; 
+    }
+    ```
+
+    For simplicity, the `foreach` can't be nested.
+
+  - The example should be **compiled to:**
+
+    ```c
+    int8 s = 0;
+    int8[] a = {1, 2, 3};
+    for (int __c = 0; __c < 3; __c++) {
+        int8 __it = a[__c];
+        s += __it; 
+    }
+    ```
+
+  - The language extension lives in the language module **ForeachLanguage.**
+
+- **Developing the Language Extension:**
+
+  - The new language defines the **ForeachStatement,** which extends C's **Statement.** It is defined as you'd expect (confer Figures 15.8/15.9 on page 383).
+
+  - We add the following **type constraint:**
+
+    ```java
+    rule typeof_ForeachStatement for ForeachStatement as fes do {
+      typeof(fes.len) :<=: <int64>;
+      if (!(fes.array.type.isInstanceOf(ArrayType))) {
+        error "array required" -> fes.array; 
+      }
+    }
+    ```
+
+  - An **ItExpression** (`__it`) refers to the value of the iterated element. An ItExpression may only be used inside a `foreach`, which is enforced by the following constraint:
+
+    ```java
+    concept constraints ItExpression { 
+      can be child
+        (context, scope, parentNode, link, childConcept)->boolean {
+          parentNode.ancestor<ForeachStatement, +>.isNotNull &&
+             parentNode.ancestor<StatementList, +>.isNotNull;
+        }
+    }
+    ```
+
+    It also carries the following **type constraint:**
+
+    ```
+    node<Type> basetype = typeof(it.ancestor<ForeachStatement>.array) 
+                            : ArrayType.baseType;
+    typeof(it) :==: basetype.copy;
+    ```
+
+  - Figure 15.10 on page 384 shows the **generator.**
+
+- 
