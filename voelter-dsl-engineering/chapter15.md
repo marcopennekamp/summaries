@@ -264,3 +264,8 @@ This section is concerned with debugging the language definition itself, instead
   - See the example above!
   - **Stack frames:** Callables on the DSL-level are not necessarily callables on the target language level and vice-versa. Concepts that are callable implement `IStackFrameContributor`.
 
+#### 15.2.6 – What's Missing?
+
+- At the time of writing, **debugging support in language workbenches** is not optimal (especially regarding extensible languages/language composition). The framework described above is not part of MPS itself.
+- The support for **multi-step transformation debugging** should be better.
+
